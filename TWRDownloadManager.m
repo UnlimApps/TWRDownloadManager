@@ -275,10 +275,14 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
 #pragma mark - File Management
 
 - (NSURL *)cachesDirectoryUrlPath {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-    NSString *cachesDirectory = [paths objectAtIndex:0];
-    NSURL *cachesDirectoryUrl = [NSURL fileURLWithPath:cachesDirectory];
-    return cachesDirectoryUrl;
+    if (self.directoryPath) {
+        return [NSURL fileURLWithPath:self.directoryPath];
+    } else {
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+        NSString *cachesDirectory = [paths objectAtIndex:0];
+        NSURL *cachesDirectoryUrl = [NSURL fileURLWithPath:cachesDirectory];
+        return cachesDirectoryUrl;
+    }
 }
 
 - (BOOL)fileDownloadCompletedForUrl:(NSString *)fileIdentifier {
@@ -318,9 +322,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
 }
 
 - (NSString *)localPathForFile:(NSString *)fileIdentifier inDirectory:(NSString *)directoryName {
-    NSString *fileName = [fileIdentifier lastPathComponent];
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-    NSString *cachesDirectory = [paths objectAtIndex:0];
+    NSString *cachesDirectory = [[self cachesDirectoryUrlPath] absoluteString];
     return [[cachesDirectory stringByAppendingPathComponent:directoryName] stringByAppendingPathComponent:fileName];
 }
 
@@ -336,8 +338,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
                inDirectory:(NSString *)directoryName {
     BOOL exists = NO;
     
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-    NSString *cachesDirectory = [paths objectAtIndex:0];
+    NSString *cachesDirectory = [[self cachesDirectoryUrlPath] absoluteString];
     
     // if no directory was provided, we look by default in the base cached dir
     if ([[NSFileManager defaultManager] fileExistsAtPath:[[cachesDirectory stringByAppendingPathComponent:directoryName] stringByAppendingPathComponent:fileName]]) {
