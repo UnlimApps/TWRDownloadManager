@@ -322,6 +322,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
 }
 
 - (NSString *)localPathForFile:(NSString *)fileIdentifier inDirectory:(NSString *)directoryName {
+    NSString *fileName = [fileIdentifier lastPathComponent];
     NSString *cachesDirectory = [[self cachesDirectoryUrlPath] absoluteString];
     return [[cachesDirectory stringByAppendingPathComponent:directoryName] stringByAppendingPathComponent:fileName];
 }
