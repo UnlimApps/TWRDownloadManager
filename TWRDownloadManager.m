@@ -100,6 +100,11 @@ NSLog(@"%@",[NSString stringWithFormat:(s), ##__VA_ARGS__])
     }
 }
 
+- (NSString *)temporaryDownloadFolder {
+    NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    return [cacheDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"/com.apple.nsurlsessiond/Downloads/%@", [[NSBundle mainBundle] bundleIdentifier]]];
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -1905,11 +1910,6 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
             download.remainingTimeBlock((NSUInteger)remainingTime);
         });
     }
-}
-
-- (NSString *)temporaryDownloadFolder {
-    NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    return [cacheDirectory stringByAppendingPathComponent:@"/com.apple.nsurlsessiond/Downloads/com.unlimapps.DonwloadTest"];
 }
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location {
