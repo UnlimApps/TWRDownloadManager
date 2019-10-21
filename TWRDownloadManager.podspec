@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "TWRDownloadManager"
-  s.version      = "1.1.2"
+  s.version      = "1.1.3"
   s.summary      = "A modern download manager based on NSURLSession to deal with asynchronous downloading, management and persistence of multiple files."
   s.homepage     = "https://github.com/chasseurmic/TWRDownloadManager"
 
