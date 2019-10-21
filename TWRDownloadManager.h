@@ -15,6 +15,8 @@
 
 + (instancetype)sharedManager;
 
+- (void)setUseChromeHeader:(BOOL)useChromeHeader;
+
 - (void)downloadFileForURL:(NSString *)url
                   withName:(NSString *)fileName
           inDirectoryNamed:(NSString *)directory
