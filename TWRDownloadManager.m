@@ -81,10 +81,8 @@ NSLog(@"%@",[NSString stringWithFormat:(s), ##__VA_ARGS__])
     }
 }
 
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        // Default session
+- (void)setUseChromeHeader:(BOOL)useChromeHeader {
+    if (useChromeHeader) {
         NSString *userAgent = self.class.userAgent;
         NSDictionary *headers = @{
             @"User-Agent" : userAgent,
@@ -94,14 +92,22 @@ NSLog(@"%@",[NSString stringWithFormat:(s), ##__VA_ARGS__])
             @"Accept-Language": @"en-us,en;q=0.5"
         };
         
+        self.session.configuration.HTTPAdditionalHeaders = headers;
+        self.backgroundSession.configuration.HTTPAdditionalHeaders = headers;
+    } else {
+        self.session.configuration.HTTPAdditionalHeaders = @{};
+        self.backgroundSession.configuration.HTTPAdditionalHeaders = @{};
+    }
+}
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
         /* Foreground session */
         NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
         if (@available(iOS 8.0, *)) {
             configuration.sharedContainerIdentifier = [[NSBundle mainBundle] bundleIdentifier];
         }
-        configuration.HTTPAdditionalHeaders = headers;
-
-        self.session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
         
         /* Background session */
         NSString *sessionIdentifier = [NSString stringWithFormat:@"%@.%@.bgtask",[[NSBundle mainBundle] bundleIdentifier],[[NSUUID UUID] UUIDString]];
@@ -114,7 +120,6 @@ NSLog(@"%@",[NSString stringWithFormat:(s), ##__VA_ARGS__])
         }
         
         if ([backgroundConfiguration respondsToSelector:@selector(set_directoryForDownloadedFiles:)]) {
-            [backgroundConfiguration set_sourceApplicationBundleIdentifier:[[NSBundle mainBundle] bundleIdentifier]];
             [backgroundConfiguration set_directoryForDownloadedFiles:[NSURL fileURLWithPath:[self temporaryDownloadFolder]]];
             if (![[NSFileManager defaultManager] fileExistsAtPath:[self temporaryDownloadFolder]]) {
                 NSError *error;
@@ -126,10 +131,14 @@ NSLog(@"%@",[NSString stringWithFormat:(s), ##__VA_ARGS__])
             }
         }
         
-        backgroundConfiguration.HTTPAdditionalHeaders = headers;
-        CCLOGWARN(@"backgroundConfiguration: %@", backgroundConfiguration);
+        if ([backgroundConfiguration respondsToSelector:@selector(set_sourceApplicationBundleIdentifier:)]) {
+            [backgroundConfiguration set_sourceApplicationBundleIdentifier:[[NSBundle mainBundle] bundleIdentifier]];
+        }
         
+        
+        self.session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
         self.backgroundSession = [NSURLSession sessionWithConfiguration:backgroundConfiguration delegate:self delegateQueue:nil];
+        
         self.downloads = [NSMutableDictionary new];
         
 #ifdef DEBUG
